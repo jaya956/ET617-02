@@ -1,26 +1,16 @@
 # Explanation of the website project:
 Basically we built a learning platform which secretly watches what people do and tells teachers(admin) everything.
 
-### Learning Content
-- **User Registration & Authentication**: Secure user accounts with password hashing
-- **Course Management**: Structured courses with multiple lesson types
-- **Interactive Lessons**: Support for text, video, and quiz content
-- **Progress Tracking**: Monitor user progress through courses
+## What does it do?
 
-### Clickstream Tracking
-- **Comprehensive Event Tracking**: Captures all user interactions
-- **Real-time Data Collection**: Tracks clicks, page views, video actions, quiz attempts
-- **Session Management**: Unique session IDs for anonymous and authenticated users
-- **Offline Support**: Stores failed events locally and retries when possible
+### For Students:
+Sign up and log in
+Take online courses (read, watch videos, do quizzes)
 
-### Tracked Events Include:
-- Page views and navigation
-- Button clicks and form interactions
-- Video play/pause/seek/completion
-- Quiz question attempts and scores
-- Scroll behavior and time on page
-- Mouse movements and keyboard shortcuts
-- Window resize and visibility changes
+### For Teachers:
+See exactly what every student does
+Know who clicked what, when, and where
+Download reports to understand student behavior
 
 ## Technology Stack
 
