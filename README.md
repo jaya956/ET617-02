@@ -4,13 +4,13 @@ Basically we built a learning platform which secretly watches what people do and
 ## What does it do?
 
 ### For Students:
-Sign up and log in
-Take online courses (read, watch videos, do quizzes)
+- Sign up and log in
+- Take online courses (read, watch videos, do quizzes)
 
 ### For Teachers:
-See exactly what every student does
-Know who clicked what, when, and where
-Download reports to understand student behavior
+- See exactly what every student does
+- Know who clicked what, when, and where
+- Download reports to understand student behavior
 
 ## Technology Stack
 
