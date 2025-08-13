@@ -1,8 +1,5 @@
-# Learning Website with Clickstream Tracking
-
-A comprehensive learning platform built with Python Flask that tracks all user interactions and stores detailed clickstream data in a database.
-
-## Features
+# Explanation of the website project:
+Basically we built a learning platform which secretly watches what people do and tells teachers(admin) everything.
 
 ### Learning Content
 - **User Registration & Authentication**: Secure user accounts with password hashing
