@@ -12,13 +12,51 @@ Basically we built a learning platform which secretly watches what people do and
 - Know who clicked what, when, and where
 - Download reports to understand student behavior
 
-## Technology Stack
+## The "Spy" System (Clickstream Tracking):
+### The website tracks:
+- Every page visit (when someone goes to a page)
+- Every button click (what buttons they press)
+- Video actions (play, pause, rewind)
+- Quiz answers (what they answered, if they got it right)
+- IP addresses (where they're accessing from)
+ 
+ ## How we built this step by step:
 
-- **Backend**: Python Flask
-- **Database**: SQLite with SQLAlchemy ORM
-- **Frontend**: HTML, CSS, JavaScript
-- **Authentication**: Flask-Login
-- **Data Tracking**: Custom clickstream system
+### Step 1: Set Up the Foundation:
+  We created a Flask website with:
+- User registration and login
+- Course management system
+- Database to store everything
+
+### Step 2: Added the "Spy" System
+ We built a tracking system that:
+- Records every user action
+- Stores data in a database
+- Works even when users aren't logged in
+
+### Step 3: Created the Admin Dashboard
+ We made special pages for teachers to:
+- See real-time user activity
+- View detailed reports
+- Export data to Excel
+
+### To enhance the Admin System:
+- Created a new detailed user activity page
+- Added filtering and search capabilities
+- Made the data display match our exact requirements
+- Fixed Issues: Corrected database paths
+
+###  Testing and Launch:
+- Started the application
+- Verified it was working
+- Tested all features
+
+## Important Elements in the project:
+- Every action is recorded instantly
+- No delay in data collection
+- Works for both logged-in and anonymous users
+- Export Capabilities: Download data as Excel files
+
 
 ## Project Structure
 
