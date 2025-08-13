@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Learning Website</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">📊 Admin Dashboard</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">View Site</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('admin_user_activity') }}" class="btn btn-primary">🔍 User Activity</a>
+                <a href="{{ url_for('export_excel') }}" class="btn btn-success">📥 Export Excel</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="admin-header">
+            <h1>🔍 User Analytics Dashboard</h1>
+            <p>Monitor user activity and export detailed analytics data</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>{{ total_users }}</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>{{ total_meaningful_events }}</h3>
+                    <p>Meaningful Events</p>
+                    <small>{{ total_events }} total</small>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                    <h3>{{ total_courses }}</h3>
+                    <p>Total Courses</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-content">
+                    <h3>{{ total_lessons }}</h3>
+                    <p>Total Lessons</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Overview -->
+        <div class="activity-overview">
+            <div class="activity-card">
+                <h2>🔍 Detailed User Activity Tracking</h2>
+                <p>Monitor real-time user interactions and clickstream data with detailed analytics:</p>
+                <ul>
+                    <li>⏰ Real-time timestamp tracking</li>
+                    <li>🌐 Event context and page navigation</li>
+                    <li>🔧 Component-level interaction details</li>
+                    <li>📝 Detailed event descriptions</li>
+                    <li>👤 User identification and IP tracking</li>
+                    <li>🔍 Advanced filtering and search capabilities</li>
+                </ul>
+                <a href="{{ url_for('admin_user_activity') }}" class="btn btn-primary btn-large">
+                    🔍 View Detailed User Activity
+                </a>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <div class="export-card">
+                <h2>📊 Export User Analytics</h2>
+                <p>Download comprehensive user activity data in Excel format including:</p>
+                <ul>
+                    <li>⏰ Time stamps for all events</li>
+                    <li>🌐 Event context and page URLs</li>
+                    <li>🔧 Component types and interactions</li>
+                    <li>📝 Event names and descriptions</li>
+                    <li>👤 User origin information</li>
+                    <li>🌍 IP addresses for tracking</li>
+                </ul>
+                <a href="{{ url_for('export_excel') }}" class="btn btn-success btn-large">
+                    📥 Download Excel Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Click Analytics Table -->
+        <div class="click-analytics">
+            <h2>🖱️ Click Analytics by Category</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Event Type</th>
+                            <th>Element Type</th>
+                            <th>Click Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analytics in click_analytics %}
+                        <tr>
+                            <td>{{ analytics.event_type }}</td>
+                            <td>{{ analytics.element_type }}</td>
+                            <td>{{ analytics.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Events Table -->
+        <div class="recent-events">
+            <h2>🕒 Recent User Events</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>User</th>
+                            <th>Event</th>
+                            <th>Page</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in recent_events %}
+                        <tr>
+                            <td>{{ event.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                {% if event.user %}
+                                    {{ event.user.username }}
+                                {% else %}
+                                    Anonymous
+                                {% endif %}
+                            </td>
+                            <td>{{ event.event_type }}</td>
+                            <td>{{ event.page_url.split('/')[-1] if event.page_url else 'N/A' }}</td>
+                            <td>{{ event.ip_address or 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

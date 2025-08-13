@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Learning Website{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Welcome, {{ current_user.username }}!</h1>
+    
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3>Courses Available</h3>
+            <p class="stat-number">{{ courses|length }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Lessons Completed</h3>
+            <p class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Average Score</h3>
+            <p class="stat-number">0%</p>
+        </div>
+    </div>
+
+    <div class="courses-section">
+        <h2>Your Courses</h2>
+        <div class="courses-grid">
+            {% for course in courses %}
+            <div class="course-card" data-course-id="{{ course.id }}">
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.description }}</p>
+                <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-primary">Continue Learning</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

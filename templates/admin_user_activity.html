@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity Tracking - Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .activity-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .activity-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .activity-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .activity-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #34495e;
+        }
+        
+        .activity-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+            vertical-align: top;
+        }
+        
+        .activity-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .activity-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .timestamp {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+        
+        .event-context {
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .component {
+            background: #e8f4fd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #2980b9;
+        }
+        
+        .event-name {
+            font-weight: 600;
+            color: #27ae60;
+        }
+        
+        .description {
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #555;
+        }
+        
+        .origin {
+            background: #e8f5e8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #27ae60;
+        }
+        
+        .ip-address {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+        
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-group {
+            display: inline-block;
+            margin-right: 2rem;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">📊 Admin Dashboard</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">View Site</a>
+                <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin_user_activity') }}" class="active">User Activity</a>
+                <a href="{{ url_for('export_excel') }}" class="btn btn-success">📥 Export Excel</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="activity-header">
+            <h1>🔍 Detailed User Activity Tracking</h1>
+            <p>Monitor real-time user interactions and clickstream data across the learning platform</p>
+        </div>
+
+
+
+        <!-- Filters -->
+        <div class="filters">
+            <h3>🔍 Filter Options</h3>
+            <div class="filter-group">
+                <label for="search">Search Description:</label>
+                <input type="text" id="search" placeholder="Search in descriptions...">
+            </div>
+            <div class="filter-group">
+                <label for="ip-filter">Filter by IP:</label>
+                <input type="text" id="ip-filter" placeholder="Enter IP address...">
+            </div>
+            <div class="filter-group">
+                <label for="user-filter">Filter by User:</label>
+                <input type="text" id="user-filter" placeholder="Enter username...">
+            </div>
+            <div class="filter-group">
+                <label for="event-filter">Filter by Event:</label>
+                <select id="event-filter">
+                    <option value="">All Events</option>
+                    <option value="Page Viewed">Page Views</option>
+                    <option value="Element Clicked">Clicks</option>
+                    <option value="User Login">Logins</option>
+                    <option value="User Logout">Logouts</option>
+                    <option value="Quiz Action">Quiz Actions</option>
+                    <option value="Video Action">Video Actions</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- User Activity Table -->
+        <div class="activity-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event Context</th>
+                        <th>Component</th>
+                        <th>Event Name</th>
+                        <th>Description</th>
+                        <th>Origin</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr class="activity-row" 
+                        data-description="{{ event.description.lower() }}"
+                        data-ip="{{ event.ip_address }}"
+                        data-user="{{ event.username.lower() }}"
+                        data-event="{{ event.event_name }}">
+                        <td class="timestamp">{{ event.timestamp.strftime('%d/%m/%y, %H:%M:%S') }}</td>
+                        <td class="event-context">{{ event.event_context }}</td>
+                        <td><span class="component">{{ event.component }}</span></td>
+                        <td class="event-name">{{ event.event_name }}</td>
+                        <td class="description">{{ event.description }}</td>
+                        <td><span class="origin">{{ event.origin }}</span></td>
+                        <td class="ip-address">{{ event.ip_address }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not events %}
+        <div class="no-data">
+            <h3>📊 No Activity Data Available</h3>
+            <p>User activity will appear here once users start interacting with the learning platform.</p>
+            <p>Try visiting the main site and performing some actions to generate clickstream data.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search');
+            const ipFilter = document.getElementById('ip-filter');
+            const userFilter = document.getElementById('user-filter');
+            const eventFilter = document.getElementById('event-filter');
+            const rows = document.querySelectorAll('.activity-row');
+
+            function filterRows() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const ipTerm = ipFilter.value.toLowerCase();
+                const userTerm = userFilter.value.toLowerCase();
+                const eventTerm = eventFilter.value;
+
+                rows.forEach(row => {
+                    const description = row.getAttribute('data-description');
+                    const ip = row.getAttribute('data-ip');
+                    const user = row.getAttribute('data-user');
+                    const event = row.getAttribute('data-event');
+
+                    const matchesSearch = !searchTerm || description.includes(searchTerm);
+                    const matchesIP = !ipTerm || ip.includes(ipTerm);
+                    const matchesUser = !userTerm || user.includes(userTerm);
+                    const matchesEvent = !eventTerm || event === eventTerm;
+
+                    if (matchesSearch && matchesIP && matchesUser && matchesEvent) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            searchInput.addEventListener('input', filterRows);
+            ipFilter.addEventListener('input', filterRows);
+            userFilter.addEventListener('input', filterRows);
+            eventFilter.addEventListener('change', filterRows);
+        });
+    </script>
+</body>
+</html>

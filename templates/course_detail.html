@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - Learning Website{% endblock %}
+
+{% block content %}
+<div class="course-detail-container">
+    <div class="course-header">
+        <h1>{{ course.title }}</h1>
+        <p>{{ course.description }}</p>
+    </div>
+
+    <div class="lessons-section">
+        <h2>Lessons</h2>
+        <div class="lessons-list">
+            {% for lesson in lessons %}
+            <div class="lesson-item" data-lesson-id="{{ lesson.id }}">
+                <div class="lesson-info">
+                    <h3>{{ lesson.title }}</h3>
+                    <span class="lesson-type">{{ lesson.content_type|title }}</span>
+                </div>
+                <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" class="btn btn-primary">Start Lesson</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

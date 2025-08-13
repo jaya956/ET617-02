@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - Learning Website{% endblock %}
+
+{% block content %}
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h1>{{ lesson.title }}</h1>
+        <span class="lesson-type">{{ lesson.content_type|title }}</span>
+    </div>
+
+    <div class="lesson-content">
+        {% if lesson.content_type == 'text' %}
+            <div class="text-content" data-lesson-id="{{ lesson.id }}">
+                <div class="content-text">{{ lesson.content }}</div>
+                <div class="lesson-actions">
+                    <button class="btn btn-primary mark-complete-btn" data-lesson-id="{{ lesson.id }}">Mark as Complete</button>
+                </div>
+            </div>
+        
+        {% elif lesson.content_type == 'video' %}
+            <div class="video-content" data-lesson-id="{{ lesson.id }}">
+                <video id="lesson-video" controls data-video-id="{{ lesson.id }}">
+                    <source src="{{ lesson.content }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-info">
+                    <p>Video: {{ lesson.title }}</p>
+                </div>
+            </div>
+        
+        {% elif lesson.content_type == 'quiz' %}
+            <div class="quiz-content" data-lesson-id="{{ lesson.id }}">
+                <div id="quiz-container">
+                    <h3>Quiz: {{ lesson.title }}</h3>
+                    <div id="quiz-questions"></div>
+                    <button id="submit-quiz" class="btn btn-primary" style="display: none;">Submit Quiz</button>
+                </div>
+                <div id="quiz-results" style="display: none;">
+                    <h3>Quiz Results</h3>
+                    <p>Score: <span id="quiz-score">0</span>%</p>
+                    <p>Correct Answers: <span id="correct-count">0</span> / <span id="total-questions">0</span></p>
+                    <button id="retake-quiz" class="btn btn-secondary">Retake Quiz</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="lesson-navigation">
+        <a href="{{ url_for('course_detail', course_id=lesson.course.id) }}" class="btn btn-secondary">Back to Course</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load quiz questions if this is a quiz lesson
+{% if lesson.content_type == 'quiz' %}
+document.addEventListener('DOMContentLoaded', function() {
+    loadQuizQuestions();
+});
+
+function loadQuizQuestions() {
+    const lessonId = {{ lesson.id }};
+    
+    // Fetch quiz questions from the backend
+    fetch(`/api/quiz-questions/${lessonId}`)
+        .then(response => response.json())
+        .then(data => {
+            displayQuizQuestions(data.questions);
+        })
+        .catch(error => {
+            console.error('Error loading quiz questions:', error);
+        });
+}
+
+function displayQuizQuestions(questions) {
+    const container = document.getElementById('quiz-questions');
+    const submitBtn = document.getElementById('submit-quiz');
+    
+    questions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'quiz-question';
+        questionDiv.innerHTML = `
+            <h4>Question ${index + 1}</h4>
+            <p>${question.question}</p>
+            <div class="options">
+                ${question.options.map((option, optIndex) => `
+                    <label>
+                        <input type="radio" name="q${index}" value="${optIndex}" data-question-id="${question.id}">
+                        ${option}
+                    </label>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(questionDiv);
+    });
+    
+    submitBtn.style.display = 'block';
+    
+    // Add event listener for submit button
+    submitBtn.addEventListener('click', submitQuiz);
+}
+
+function submitQuiz() {
+    const lessonId = {{ lesson.id }};
+    const answers = {};
+    
+    // Collect all answers
+    document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+        const questionIndex = input.name.replace('q', '');
+        answers[questionIndex] = parseInt(input.value);
+        
+        // Track each answer selection
+        trackEvent('quiz_action', `question_${input.dataset.questionId}`, 'quiz_question', {
+            quiz_id: lessonId,
+            question_id: input.dataset.questionId,
+            answer_selected: input.value
+        });
+    });
+    
+    // Submit quiz
+    fetch('/api/submit_quiz', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            lesson_id: lessonId,
+            answers: answers
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showQuizResults(data);
+    })
+    .catch(error => {
+        console.error('Error submitting quiz:', error);
+    });
+}
+
+function showQuizResults(data) {
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('quiz-results').style.display = 'block';
+    document.getElementById('quiz-score').textContent = data.score;
+    document.getElementById('correct-count').textContent = data.correct_count;
+    document.getElementById('total-questions').textContent = data.total_questions;
+    
+    // Track quiz completion
+    trackEvent('quiz_action', `quiz_{{ lesson.id }}_complete`, 'quiz', {
+        score: data.score,
+        total_questions: data.total_questions
+    });
+}
+
+// Retake quiz functionality
+document.getElementById('retake-quiz').addEventListener('click', function() {
+    location.reload();
+});
+{% endif %}
+
+// Video tracking for video lessons
+{% if lesson.content_type == 'video' %}
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('lesson-video');
+    const lessonId = {{ lesson.id }};
+    
+    // Track video play
+    video.addEventListener('play', function() {
+        trackEvent('video_action', `video_${lessonId}`, 'video', {
+            video_id: lessonId,
+            video_action: 'play',
+            video_time: video.currentTime
+        });
+    });
+    
+    // Track video pause
+    video.addEventListener('pause', function() {
+        trackEvent('video_action', `video_${lessonId}`, 'video', {
+            video_id: lessonId,
+            video_action: 'pause',
+            video_time: video.currentTime
+        });
+    });
+    
+    // Track video seeking
+    video.addEventListener('seeked', function() {
+        trackEvent('video_action', `video_${lessonId}`, 'video', {
+            video_id: lessonId,
+            video_action: 'seek',
+            video_time: video.currentTime
+        });
+    });
+    
+    // Track video completion
+    video.addEventListener('ended', function() {
+        trackEvent('video_action', `video_${lessonId}`, 'video', {
+            video_id: lessonId,
+            video_action: 'complete',
+            video_time: video.duration
+        });
+    });
+    
+    // Track time updates every 10 seconds
+    let lastTrackedTime = 0;
+    video.addEventListener('timeupdate', function() {
+        if (video.currentTime - lastTrackedTime >= 10) {
+            trackEvent('video_action', `video_${lessonId}`, 'video', {
+                video_id: lessonId,
+                video_action: 'progress',
+                video_time: video.currentTime
+            });
+            lastTrackedTime = video.currentTime;
+        }
+    });
+});
+{% endif %}
+
+// Mark lesson as complete for text lessons
+{% if lesson.content_type == 'text' %}
+document.addEventListener('DOMContentLoaded', function() {
+    const completeBtn = document.querySelector('.mark-complete-btn');
+    const lessonId = {{ lesson.id }};
+    
+    completeBtn.addEventListener('click', function() {
+        trackEvent('lesson_action', `lesson_${lessonId}_complete`, 'lesson', {
+            lesson_id: lessonId,
+            content_type: 'text'
+        });
+        
+        completeBtn.textContent = 'Completed!';
+        completeBtn.disabled = true;
+        completeBtn.classList.add('completed');
+    });
+});
+{% endif %}
+</script>
+{% endblock %}
